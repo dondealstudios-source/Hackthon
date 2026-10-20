@@ -1,0 +1,31 @@
+:root{--transition-fast:180ms;--transition-standard:280ms;--transition-ease:cubic-bezier(.22,1,.36,1)}
+.program-panel-frame{display:grid;isolation:isolate;align-items:stretch}.program-panel-frame>.day-panel{align-self:stretch;min-width:0}
+.header{transition:background var(--transition-standard),border-color var(--transition-standard)}
+.button,.text-button,.nav a,.object-control{transition:background var(--transition-fast),border-color var(--transition-fast),color var(--transition-fast),transform var(--transition-standard) var(--transition-ease)}
+.button svg,.text-button svg{transition:transform var(--transition-standard) var(--transition-ease)}
+.statement-card,.day-tab,.journey-step{transition:background var(--transition-standard),border-color var(--transition-standard),box-shadow var(--transition-standard)}
+.statement-card strong,.statement-card-bottom,.statement-icon,.step-explore{transition:color var(--transition-standard),opacity var(--transition-standard)}
+.registration-form-card input,.registration-form-card select,.registration-form-card textarea,.faq-search{transition:border-color var(--transition-fast),background var(--transition-fast),box-shadow var(--transition-standard)}
+.form-stage:not([hidden]){animation:form-transition 320ms var(--transition-ease) both}.form-step-heading{animation:heading-transition 280ms var(--transition-ease) both}
+.studio-disclosure[open]>.studio-body{animation:studio-transition 450ms var(--transition-ease) both}.studio-open-label svg{transition:rotate var(--transition-standard) var(--transition-ease)}
+.rules-details[open] .rules-grid,.rules-details[open] .topic-list{animation:studio-transition 320ms var(--transition-ease) both}
+.modal[open]{animation:modal-transition 280ms var(--transition-ease) both}.modal::backdrop{animation:backdrop-transition 220ms ease both}
+.partner-logo-link img{transition:opacity var(--transition-standard),scale var(--transition-standard) var(--transition-ease)}
+.overview-block:after{transition:width 400ms var(--transition-ease)}
+@keyframes form-transition{from{opacity:0;translate:10px 0}to{opacity:1;translate:0 0}}
+@keyframes heading-transition{from{opacity:.3;translate:0 5px}to{opacity:1;translate:0 0}}
+@keyframes studio-transition{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+@keyframes modal-transition{from{opacity:0;scale:.985;translate:0 12px}to{opacity:1;scale:1;translate:0 0}}
+@keyframes backdrop-transition{from{opacity:0}to{opacity:1}}
+@keyframes navigation-transition{from{opacity:0;translate:0 -7px}to{opacity:1;translate:0 0}}
+@media(max-width:900px){.header .nav.open{animation:navigation-transition 240ms var(--transition-ease) both}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+.header{transition:background 280ms,border-color 280ms,box-shadow 280ms}.header[data-scrolled]{background:#fafbf8f7;border-bottom-color:#d2ddc9;box-shadow:0 5px 20px #213b2706}
+.day-tab{position:relative;overflow:hidden}.day-tab:after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#5c7e43;transform:scaleX(0);transform-origin:left;transition:transform 350ms var(--transition-ease)}.day-tab.active{border-bottom-color:transparent}.day-tab.active:after{transform:scaleX(1)}
+.faq-item:not([hidden]){animation:filtered-question 240ms var(--transition-ease) both}.faq-search:focus-within{transition:border-color 200ms,box-shadow 250ms;box-shadow:0 0 0 3px #71955a0a}
+.overview-block .text-button svg,.studio-open-label svg{transition:transform 280ms var(--transition-ease),rotate 280ms var(--transition-ease)}.overview-block:hover .text-button svg{transform:translate(3px,-2px)}
+.leaf-canvas:focus-visible{outline:1px solid #8fa67c;outline-offset:-12px;border-radius:3px}
+@supports(interpolate-size:allow-keywords){.studio-disclosure,.rules-details{interpolate-size:allow-keywords}.studio-disclosure::details-content,.rules-details::details-content{block-size:0;overflow:clip;transition:block-size 400ms var(--transition-ease),content-visibility 400ms allow-discrete}.studio-disclosure[open]::details-content,.rules-details[open]::details-content{block-size:auto}}
+@keyframes filtered-question{from{opacity:.2;translate:0 5px}to{opacity:1;translate:0 0}}
+@media(prefers-reduced-motion:reduce){.faq-item:not([hidden]){animation:none}.day-tab:after,.header,.overview-block .text-button svg,.studio-open-label svg{transition:none}.overview-block:hover .text-button svg{transform:none}}

@@ -1,0 +1,4 @@
+.leaf-scene{position:absolute;inset:0;isolation:isolate}.leaf-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair;touch-action:pan-y}
+.editorial-hero .globe-stage:has(.leaf-scene){overflow:visible}.editorial-hero .globe-stage:has(.leaf-scene):after{display:none}
+@media(max-width:700px){.editorial-hero .globe-stage:has(.leaf-scene){min-height:320px;height:320px}}
+@media(prefers-reduced-motion:reduce){.leaf-canvas{cursor:default}}

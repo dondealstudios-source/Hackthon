@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /organizer
+
+Sitemap: https://buildfeast.vistacortex.in/sitemap.xml
