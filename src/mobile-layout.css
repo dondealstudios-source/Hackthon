@@ -83,8 +83,18 @@
   .mentoring-header>div>p,.topic-panel p,.opportunity-panel>p{font-size:14px;line-height:1.75}
   .mentoring-topics{gap:25px;margin-top:26px}.topic-panel h3{font-size:20px}
   .particle-wave{height:110px;margin-block:22px 0}
-  .partner-grid{grid-template-columns:1fr;gap:12px}.partner-grid .partner-card{height:145px;padding:24px}
-  .partner-card img{max-width:210px;max-height:85px}
+  .site-shell main>.partners-section{padding-block:30px}
+  .partners-section h2{font-size:29px;line-height:1.15;margin:14px 0 10px}
+  .partners-section p{font-size:13px;line-height:1.6;max-width:32ch}
+  .partners-section .partner-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:20px;border:0}
+  .partner-grid .partner-card,.partner-grid .partner-card+.partner-card{height:108px;min-width:0;padding:10px 8px;gap:0;border:1px solid #d7e3cd;border-radius:13px}
+  .partner-card .small-label{display:none}
+  .partner-card .partner-logo-link{position:relative;inset:auto;display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:44px}
+  .partner-card .partner-logo-link img{width:100%;height:auto;max-width:100%;max-height:65px;object-fit:contain}
+  .partner-card .partner-logo-link img[src*="company-express-logo"]{width:64px;height:64px;max-width:100%;max-height:64px;border-radius:5px}
+  .partner-card .partner-logo-link img[src*="dharma-setu-logo"]{width:72px;height:72px;max-width:100%;max-height:72px}
+  .partner-logo-link .partner-visit-icon{display:none}
+  .partner-card .partner-logo-link:focus-visible{outline:2px solid #285d3e;outline-offset:2px;border-radius:6px}
   .registration-layout{grid-template-columns:minmax(0,1fr);gap:26px}.registration-story{padding-top:0}
   .registration-story>p,.join-journey p{font-size:14px;line-height:1.7}.registration-story>p{margin-top:18px}
   .registration-form-card{padding:23px 18px}.registration-card-header h3{font-size:21px}
