@@ -37,15 +37,17 @@
   .event-snapshot strong{font-size:14px;line-height:1.4}
   .snapshot-note{font-size:11px;line-height:1.5}
   .motion-ribbon{padding-block:16px}.ribbon-group>span{font-size:25px}
-  .challenge-sculpture{height:290px;margin-bottom:16px;border-radius:18px}
+  .challenge-sculpture{height:auto;min-height:0;padding-top:170px;margin-bottom:16px;border-radius:18px}
   .challenge-sculpture>.living-field{top:20px;height:170px}
   .sculpture-index{top:15px;left:16px;font-size:27px}
-  .sculpture-footer{left:16px;right:16px;bottom:16px;gap:12px}
+  .sculpture-footer{position:relative;inset:auto;margin:0 16px 16px;display:grid;grid-template-columns:minmax(0,1fr);justify-content:stretch;align-items:stretch;gap:16px;min-width:0}
   .sculpture-title{gap:5px;max-width:100%}
   .sculpture-title>span{font-size:8px;letter-spacing:1.3px}
   .sculpture-title strong{font-size:16px;line-height:1.3;min-height:21px}
-  .sculpture-controls{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;width:100%}
-  .sculpture-controls button{width:100%;height:38px;font-size:11px;border-radius:10px}
+  .sculpture-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%;min-width:0}
+  .sculpture-controls button{display:grid;place-items:center;width:100%;min-width:0;height:44px;padding:0;font:500 13px/1 'Segoe UI',sans-serif;border-radius:12px;background:#fafcf6;touch-action:manipulation}
+  .sculpture-controls button[aria-pressed=true]{box-shadow:0 3px 8px #285d3e18}
+  .sculpture-controls button:active{scale:.96}
   .sculpture-controls button:hover{transform:none}
   .challenge-discovery{margin-block:0 18px}
   .surprise-control{min-height:42px;font-size:12px;padding-inline:15px}
@@ -67,10 +69,10 @@
   .day-panel-copy>p{font-size:14px;line-height:1.75}
   .session-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:22px;font-size:9px}
   .session-details strong{font-size:12px;line-height:1.5}
-  .day-panel-art:has(.build-stack){min-height:260px;border-radius:0;border-left:0;display:flex}
-  .build-stack{height:260px;min-height:260px;padding:18px 12px;gap:8px;justify-content:space-between}
-  .build-stack .object-eyebrow{font-size:8px;letter-spacing:1px;flex-shrink:0}
-  .build-stack .stack-perspective{min-height:145px;height:145px;flex:1}
+  .day-panel-art:has(.build-stack){min-height:240px;border-radius:0;border-left:0;display:flex}
+  .build-stack{height:240px;min-height:240px;padding:16px 12px;gap:12px;justify-content:space-between}
+  .build-stack .object-eyebrow{display:none}
+  .build-stack .stack-perspective{min-height:156px;height:156px;flex:1}
   .build-stack .stack-object{width:145px;height:100px}
   .build-stack .stack-layer-label{font-size:6px;padding:9px 11px}
   .build-stack .object-control{min-height:40px;padding:8px 13px;font-size:11px;flex-shrink:0}
@@ -104,7 +106,6 @@
 }
 @media(max-width:359px){
   .site-shell{--page-gutter:16px}.header .brand-logo{width:138px}
-  .section h2{font-size:30px}.sculpture-controls{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-  .sculpture-controls button{height:40px}.challenge-sculpture{height:340px}
+  .section h2{font-size:30px}
   .sculpture-title strong{font-size:15px}.session-details{grid-template-columns:1fr;gap:14px}
 }

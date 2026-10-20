@@ -16,6 +16,7 @@ export default function SiteInteractions() {
     if (!root) return;
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+    const phone = matchMedia('(max-width: 700px)');
     const header = root.querySelector<HTMLElement>('.header');
     let compact = false;
     const scrollHeader = () => { const next = window.scrollY > 24; if (next !== compact) { compact = next; header?.toggleAttribute('data-scrolled', compact); } };
@@ -71,6 +72,7 @@ export default function SiteInteractions() {
     const arrivals = new IntersectionObserver(entries => {
       for (const entry of entries) {
         if (!entry.isIntersecting) {
+          if (phone.matches) continue;
           if (running.has(entry.target)) continue;
           onScreen.delete(entry.target);
           if (entry.target.classList.contains('section')) entry.target.removeAttribute('data-arrived');
@@ -85,7 +87,10 @@ export default function SiteInteractions() {
         const panel = entry.target.matches('.registration-form-card, .guest-panel');
         const siblings = entry.target.parentElement ? Array.from(entry.target.parentElement.children) : [];
         const order = Math.max(0, siblings.indexOf(entry.target)) % 4;
-        const animation = entry.target.animate(heading ? [
+        const animation = entry.target.animate(phone.matches ? [
+          { opacity: .25, translate: '0 20px' },
+          { opacity: 1, translate: '0 0' },
+        ] : heading ? [
           { opacity: 0, translate: '0 28px', clipPath: 'inset(0 0 100% 0)' },
           { opacity: 1, translate: '0 0', clipPath: 'inset(0 0 0% 0)' },
         ] : panel ? [
@@ -94,17 +99,17 @@ export default function SiteInteractions() {
         ] : [
           { opacity: .05, translate: '0 42px', scale: '.975' },
           { opacity: 1, translate: '0 0', scale: '1' },
-        ], { duration: heading ? 800 : 700, delay: heading || panel ? 0 : order * 65, fill: 'backwards', easing: 'cubic-bezier(.22,1,.36,1)' });
+        ], { duration: phone.matches ? 520 : heading ? 800 : 700, delay: phone.matches ? 0 : heading || panel ? 0 : order * 65, fill: 'backwards', easing: 'cubic-bezier(.22,1,.36,1)' });
         running.set(entry.target, animation);
         animation.onfinish = () => {
           if (running.get(entry.target) !== animation) return;
           running.delete(entry.target);
           const bounds = entry.target.getBoundingClientRect();
-          if (bounds.bottom <= 0 || bounds.top >= innerHeight * .92) onScreen.delete(entry.target);
+          if (!phone.matches && (bounds.bottom <= 0 || bounds.top >= innerHeight * .92)) onScreen.delete(entry.target);
         };
       }
     }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
-    root.querySelectorAll('.section, .section h2, .hero-visual, .event-snapshot>div, .overview-block, .statement-card, .day-tab, .journey-step, .topic-panel, .opportunity-panel, .partner-card, .registration-form-card, .guest-panel').forEach(section => arrivals.observe(section));
+    root.querySelectorAll('.section, .section h2, .hero-visual, .event-snapshot>div, .overview-block, .statement-card, .day-tab, .journey-step, .topic-panel, .opportunity-panel, .partner-card, .registration-form-card, .guest-panel, .challenge-sculpture, .build-stack .stack-perspective, .particle-wave').forEach(section => arrivals.observe(section));
     const cancelMotion = () => { if (reduced.matches) { running.forEach(animation => animation.cancel()); running.clear(); } };
     root.addEventListener('pointermove', move, { passive: true }); root.addEventListener('pointerleave', clear);
     reduced.addEventListener('change', clear);
