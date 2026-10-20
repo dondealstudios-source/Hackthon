@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from 
 import { ArrowDown, ArrowRight, ArrowUpRight, ChevronDown, Menu, Trophy, X } from 'lucide-react';
 import { defaultEvent, type EventConfig } from './config/event';
 import LeafMark from './components/LeafMark';
+import IdeaGarden from './components/IdeaGarden';
 import { ParticleWave } from './components/LivingGraphics';
 import { MotionRibbon, LeafAtmosphere } from './components/MotionDetails';
 import Modal from './components/Modal';
@@ -80,7 +81,7 @@ export default function App() {
           <Reveal className="overview-block"><span className="overview-number">01</span><h3>Learn by doing.</h3><p>Two workshops focused on technology, development, and practical tools you can use in your own projects.</p><a className="text-button" href="#program">View the program<ArrowUpRight size={15}/></a></Reveal>
           <Reveal className="overview-block"><span className="overview-number">02</span><h3>Understand the bigger picture.</h3><p>A startup mentoring session covering business structures, responsibilities, and the costs of getting started.</p><a className="text-button" href="#mentoring">Explore the session<ArrowUpRight size={15}/></a></Reveal>
           <Reveal className="overview-block"><span className="overview-number">03</span><h3>Build something that works.</h3><p>Choose a problem statement, develop a prototype, and present the thinking behind your solution.</p><a className="text-button" href="#problem-statements">Find your challenge<ArrowUpRight size={15}/></a></Reveal>
-        </div></section>
+        </div><IdeaGarden/></section>
 
         <ProblemStatements config={config} onChoose={name => { setSelectedProblem(name); join(); }}/>
 
