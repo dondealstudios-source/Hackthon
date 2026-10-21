@@ -3,10 +3,10 @@ export function getFaqs(config: EventConfig): string[][] {
   const status = config.registrationStatus === 'open' ? 'Registrations open' : config.registrationStatus === 'closed' ? 'Registrations closed' : 'Registrations opening soon';
   const pending = 'Details will be announced soon.';
   const faqs = [
-    [`What is ${config.name}?`, 'An offline student innovation event organized by VistaCortex. Four program days combine practical workshops, startup mentoring, and an in-person hackathon. Venues will be announced soon.'],
+    [`What is ${config.name}?`, 'A two-day offline student hackathon organized by VistaCortex. Choose from eight problem statements and build a solution in person. Venues will be announced soon.'],
     ['Who can participate?', config.eligibility || 'BuildFeast is a student innovation event. Final eligibility requirements will be announced soon.'],
     ['Where will the event take place?', config.venue ? `BuildFeast is an offline, in-person event. Venue: ${config.venue}.` : 'BuildFeast is an offline, in-person event. Venues will be announced soon.'],
-    ['What happens during the four-day program?', 'Day 1: Workshop 1. Day 2: Workshop 2. Day 3: Startup Mentoring. Day 4: Offline Hackathon. The days may be spaced across multiple weekends.'],
+    ['How long is the hackathon?', 'BuildFeast is a two-day offline hackathon. Exact dates, venue, detailed agenda, and timings will be announced soon.'],
     ['What is the registration fee?', `The registration fee is ₹${config.fee}. Payment will become available when registration opens and the fee basis and terms are finalized.`],
     ['Is ₹300 charged per participant or per team?', config.feeBasis ? `The fee is charged ${config.feeBasis === 'per_team' ? 'per team' : 'per participant'}.` : 'The fee basis is being finalized. We will confirm whether ₹300 applies per participant or per team before paid registration opens.'],
     ['Can I participate individually?', config.teamSize || 'Individual and team interest can both be recorded on the waitlist. Final participation and team-size rules will be announced soon.'],
@@ -20,7 +20,7 @@ export function getFaqs(config: EventConfig): string[][] {
     ['Will participants receive certificates?', config.hackathon.certificates || pending],
     ['Who are the official partners?', `${config.partners.map(p => p.name).join(' and ')} are the official event partners. VistaCortex is the organizer.`],
     ['Where can I find the event rules?', config.rulesAcceptedText || 'Finalized rules will be published here before paid registration opens.'],
-    ['How do I contact the organizers?', config.contact.email ? `Email ${config.contact.email}.` : 'Official contact details will be published soon. You can submit a mentoring question through this site.'],
+    ['How do I contact the organizers?', config.contact.email ? `Email ${config.contact.email}.` : 'Official contact details will be published soon.'],
   ];
 
 return faqs;

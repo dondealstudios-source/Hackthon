@@ -19,7 +19,7 @@ export default function RegistrationSection({ config, onPolicy, initialInterest 
   const open = config.registrationStatus === 'open';
   const reduced = useReducedMotion();
   return <section id="registration" className="section registration-section" aria-labelledby="registration-heading">
-    <div className="section-top"><span className="eyebrow">08 / PARTICIPATION</span><span className="registration-status"><span className="status-dot"/>{open ? 'Registration open' : config.registrationStatus === 'closed' ? 'Registration closed · stay connected' : 'Registration coming soon'}</span></div>
+    <div className="section-top"><span className="eyebrow">07 / PARTICIPATION</span><span className="registration-status"><span className="status-dot"/>{open ? 'Registration open' : config.registrationStatus === 'closed' ? 'Registration closed · stay connected' : 'Registration coming soon'}</span></div>
     <div className="registration-layout">
       <div className="registration-story"><h2 id="registration-heading" tabIndex={-1}>Take your place<br/><span>at BuildFeast.</span></h2><p>Explore participation details for BuildFeast 2027. Registration dates and final rules will be announced soon.</p><p className="registration-venue"><MapPin size={15}/>{config.venue || 'Offline event · venues announced soon'}</p>
         <ol className="join-journey">{[
@@ -27,7 +27,7 @@ export default function RegistrationSection({ config, onPolicy, initialInterest 
           ['Choose your interests', 'Let us know what you are excited to learn and build.'],
           [open ? 'Review & register' : 'Review & join the waitlist', open ? 'Review your information and continue to payment.' : 'Record your interest. No payment is collected now.'],
         ].map(([title, text], i) => <motion.li key={title} initial={reduced ? false : { opacity: 0, x: -12 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: .4, delay: reduced ? 0 : i * .1 }}><span>0{i + 1}</span><div><h3>{title}</h3><p>{text}</p></div></motion.li>)}</ol>
-        <div className="registration-inclusions"><span><Check size={15}/>Technical workshops</span><span><Check size={15}/>Startup mentoring</span><span><Check size={15}/>Offline hackathon</span></div>
+        <div className="registration-inclusions"><span><Check size={15}/>Two-day hackathon</span><span><Check size={15}/>In-person collaboration</span><span><Check size={15}/>Offline hackathon</span></div>
         <div className="registration-transparency"><ShieldCheck size={21}/><p>{open ? 'Payment is verified by the server before your registration is confirmed.' : 'Joining the waitlist records your interest. It does not guarantee a place, prize, or internship. Registration dates and final rules will be announced separately.'}</p></div>
       </div>
       <div className="registration-form-card"><div className="registration-card-header"><div><span className="eyebrow">VISTACORTEX / BUILDFEAST 2027</span><h3>{open ? 'Participant registration' : 'Registration details'}</h3></div><span className="registration-card-icon"><ArrowUpRight size={24}/></span></div><EntryForm kind={open ? 'registration' : 'waitlist'} config={config} guided initialInterest={initialInterest}/><div className="registration-policy-links"><button onClick={() => onPolicy('privacy')}>Privacy</button><button onClick={() => onPolicy('terms')}>Event terms</button><button onClick={() => onPolicy('refund')}>Refund policy</button></div></div>

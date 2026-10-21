@@ -1,5 +1,7 @@
 # VistaCortex BuildFeast 2027
 
+BuildFeast is a two-day offline hackathon. The former workshop and startup mentoring program is no longer offered. Exact dates, venue, and detailed timings are pending.
+
 The public SEO URL is `https://buildfeast.vistacortex.in`. FAQs live at `/faq`, with their own title, description, and canonical URL. The homepage links to them rather than rendering the entire FAQ list. `server/seo.mjs` supplies crawlable HTML and Organization/WebSite/WebPage structured data; Vite uses the same renderer in development and builds. `public/robots.txt` and `public/sitemap.xml` include the confirmed domain and public pages. The organizer page sends `noindex`. Exact dates and venue addresses are pending, so Event rich-result markup is deliberately withheld until those details are confirmed. This configuration does not deploy the website or configure DNS.
 
 Responsive React + TypeScript + Vite site, Tailwind CSS, Framer Motion, a Canvas particle globe, and an Express API with durable SQLite storage. Node.js **24 or newer** is required for built-in SQLite. There was no existing code or logo in the supplied workspace.

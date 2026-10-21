@@ -15,3 +15,5 @@
 .submissions-paused{padding:30px 0;min-height:180px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:18px}.submissions-paused h3{font-size:25px;letter-spacing:-.7px}.submissions-paused p{font-size:13px;line-height:1.8;color:#67745f}.submissions-paused .text-button{display:inline-flex;gap:10px;align-items:center}
 @media(max-width:700px){.site-shell main>.section,.site-shell main>.closing-section{padding:44px var(--page-gutter)}.site-shell main>.editorial-hero{padding:0 var(--page-gutter)}.hero-editorial-grid{min-height:0;padding-block:32px 24px;gap:28px}.hero-content h1{font-size:clamp(58px,15vw,90px)}.hero-visual .globe-stage{height:300px;flex:auto}.motion-ribbon{padding-block:18px}.event-snapshot{margin-inline:var(--page-gutter)}}
 @media(min-width:701px) and (max-height:800px){.hero-editorial-grid{padding-block:30px 26px;min-height:540px}.hero-content h1{font-size:clamp(64px,6.2vw,94px)}.hero-visual .globe-stage{max-height:390px}}
+
+.timeline.hackathon-days{grid-template-columns:repeat(2,minmax(0,1fr))}

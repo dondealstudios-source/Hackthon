@@ -1,12 +1,12 @@
 export const SITE_URL = 'https://buildfeast.vistacortex.in';
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
-const description = 'Join VistaCortex BuildFeast 2027: an offline student hackathon with eight problem statements, technical workshops and startup mentoring. Venues announced soon.';
+const description = 'Join VistaCortex BuildFeast 2027: a two-day offline student hackathon with eight problem statements. Venues announced soon.';
 
 export function renderSeoDocument(html, config, pathname = '/') {
   const faq = /^\/faq\/?$/.test(pathname), organizer = pathname === '/organizer';
   const canonical = SITE_URL + (faq ? '/faq' : '/');
   const title = faq ? 'FAQs | BuildFeast 2027 — VistaCortex' : `${config.name} | Offline Student Hackathon`;
-  const summary = faq ? `Answers about ${config.name} registration, fees, offline venues, problem statements, workshops and participation.` : description;
+  const summary = faq ? `Answers about ${config.name} registration, fees, offline venues, problem statements and participation.` : description;
   const image = SITE_URL + '/assets/vistacortex-buildfeast-2027.png';
   const graph = {
     '@context': 'https://schema.org',
