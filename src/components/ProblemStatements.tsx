@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, Bot, Check, Compass, Cpu, GraduationCap, HeartPulse, Landmark, RadioTower, ShieldCheck, Shuffle } from 'lucide-react';
 import { getProblemStatements, type EventConfig } from '../config/event';
-import { ChallengeMap } from './LivingGraphics';
+import ChallengeDeck from './ChallengeDeck';
 
 const icons = [HeartPulse, Bot, ShieldCheck, Landmark, GraduationCap, Compass, RadioTower, Cpu];
 
@@ -30,7 +30,7 @@ export default function ProblemStatements({ config, onChoose }: { config: EventC
   return <section id="problem-statements" className="section statements-section" aria-labelledby="statements-heading">
     <div className="section-top"><span className="eyebrow">02 / PROBLEM STATEMENTS</span><span className="tiny-note">{String(statements.length).padStart(2, '0')} PROBLEM STATEMENTS</span></div>
     <div className="section-heading split-heading"><h2 id="statements-heading">Choose your<br/><span className="muted-heading">problem statement.</span></h2><p>Explore the hackathon’s problem statements and choose the one you would like to build for.</p></div>
-    <ChallengeMap statements={statements} active={active} onSelect={index => { stopShuffle(); setActive(index); }}/>
+    <ChallengeDeck statements={statements} active={active} onSelect={index => { stopShuffle(); setActive(index); }}/>
     <div className="challenge-discovery"><button type="button" className={`surprise-control ${shuffling ? 'is-shuffling' : ''}`} onClick={surprise} disabled={shuffling || statements.length < 2}><Shuffle size={14}/>{shuffling ? 'Finding a challenge…' : 'Surprise me'}</button></div>
     <div className="statements-grid" role="group" aria-label="Hackathon problem statements">{statements.map((name, i) => {
       const Icon = icons[i % icons.length];
