@@ -1,11 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
+import { challengeTargets } from './challenge-particles';
 
 type Target = { x: number; y: number; color: string };
 type Particle = Target & { px: number; py: number; vx: number; vy: number; seed: number };
 
 /** Samples the existing logo mark, then animates its particles without altering the brand asset. */
-export default function LeafMark({ compact = false }: { compact?: boolean }) {
+export default function LeafMark({ compact = false, symbol, label = 'BuildFeast leaf symbol' }: { compact?: boolean; symbol?: number; label?: string }) {
   const helpId = useId();
   const ref = useRef<HTMLCanvasElement>(null);
   const scatteredRef = useRef(false);
@@ -44,7 +45,7 @@ export default function LeafMark({ compact = false }: { compact?: boolean }) {
         fallback.push({ x: Math.cos(angle) * along - Math.sin(angle) * across, y: Math.sin(angle) * along + Math.cos(angle) * across, color: leaf % 2 ? '#659b5e' : '#063d2e' });
       }
     }
-    populate(fallback);
+    populate(symbol === undefined ? fallback : challengeTargets(symbol));
 
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
@@ -61,7 +62,7 @@ export default function LeafMark({ compact = false }: { compact?: boolean }) {
           const radius = .16 + (particle.seed % 107) / 107 * .4;
           tx = Math.cos(angle) * radius; ty = Math.sin(angle) * radius;
         } else if (!preference.matches) {
-          const breathe = 1 + Math.sin(phase * .5) * .009;
+          const breathe = 1 + Math.sin(phase * (symbol === 0 ? 5 : .5)) * (symbol === 0 ? .025 : .009);
           tx *= breathe; ty *= breathe;
           tx += Math.sin(phase + particle.seed * .9) * .0014;
           ty += Math.cos(phase * .7 + particle.seed) * .0014;
@@ -81,12 +82,12 @@ export default function LeafMark({ compact = false }: { compact?: boolean }) {
           particle.vy = (particle.vy + (ty - particle.py) * .035) * .79;
           particle.px += particle.vx; particle.py += particle.vy;
         }
-        const depth = Math.sin(particle.x * 7 + particle.y * 5) * .055;
+        const depth = Math.sin(particle.x * 7 + particle.y * 5) * (symbol === undefined ? .055 : .13);
         const x = cx + (particle.px + (preference.matches ? 0 : tiltX * depth)) * size;
         const y = cy + (particle.py + (preference.matches ? 0 : tiltY * depth)) * size;
         ctx.globalAlpha = .68 + (particle.seed % 7) / 7 * .3;
         ctx.fillStyle = particle.color;
-        ctx.beginPath(); ctx.arc(x, y, Math.max(.7, size / 245) * (particle.seed % 5 === 0 ? 1.12 : .85), 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, Math.max(.7, size / (symbol === undefined ? 245 : 195)) * (particle.seed % 5 === 0 ? 1.12 : .85), 0, Math.PI * 2); ctx.fill();
       }
       ctx.globalAlpha = 1;
     };
@@ -121,7 +122,7 @@ export default function LeafMark({ compact = false }: { compact?: boolean }) {
         start();
       }
     };
-    logo.src = '/assets/vistacortex-buildfeast-transparent.png';
+    if (symbol === undefined) logo.src = '/assets/vistacortex-buildfeast-transparent.png';
     const resize = new ResizeObserver(() => {
       width = canvas.clientWidth; height = canvas.clientHeight;
       const dpr = Math.min(devicePixelRatio || 1, 1.5);
@@ -138,7 +139,7 @@ export default function LeafMark({ compact = false }: { compact?: boolean }) {
     canvas.addEventListener('pointermove', move, { passive: true }); canvas.addEventListener('pointerleave', leave); canvas.addEventListener('pointerdown', down, { passive: true }); canvas.addEventListener('pointerup', tap, { passive: true }); canvas.addEventListener('pointercancel', cancel);
     document.addEventListener('visibilitychange', start); preference.addEventListener('change', start);
     return () => { disposed = true; cancelAnimationFrame(frame); logo.onload = null; resize.disconnect(); observer.disconnect(); canvas.removeEventListener('pointermove', move); canvas.removeEventListener('pointerleave', leave); canvas.removeEventListener('pointerdown', down); canvas.removeEventListener('pointerup', tap); canvas.removeEventListener('pointercancel', cancel); document.removeEventListener('visibilitychange', start); preference.removeEventListener('change', start); };
-  }, [compact]);
+  }, [compact, symbol]);
 
-  return <div className="leaf-scene"><canvas ref={ref} className="leaf-canvas" role={reduced ? 'img' : 'button'} tabIndex={reduced ? undefined : 0} aria-pressed={reduced ? undefined : scattered} aria-label={reduced ? 'BuildFeast leaf symbol rendered in particles' : 'Scatter and reform the BuildFeast leaf symbol'} aria-describedby={helpId} onPointerDown={compact ? event => event.stopPropagation() : undefined} onKeyDown={event => { if (!reduced && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); setScattered(current => !current); } }}/><span id={helpId} className="sr-only">Move your pointer to interact. Tap, click, or press Enter to scatter the leaves. The symbol reforms automatically.</span></div>;
+  return <div className="leaf-scene"><canvas ref={ref} className="leaf-canvas" role={reduced ? 'img' : 'button'} tabIndex={reduced ? undefined : 0} aria-pressed={reduced ? undefined : scattered} aria-label={reduced ? `${label} rendered in particles` : `Scatter and reform: ${label}`} aria-describedby={helpId} onPointerDown={compact ? event => event.stopPropagation() : undefined} onKeyDown={event => { if (!reduced && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); setScattered(current => !current); } }}/><span id={helpId} className="sr-only">Move your pointer to interact. Tap, click, or press Enter to scatter the particles. The symbol reforms automatically.</span></div>;
 }
