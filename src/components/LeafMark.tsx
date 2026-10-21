@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 
 type Target = { x: number; y: number; color: string };
 type Particle = Target & { px: number; py: number; vx: number; vy: number; seed: number };
 
 /** Samples the existing logo mark, then animates its particles without altering the brand asset. */
-export default function LeafMark() {
+export default function LeafMark({ compact = false }: { compact?: boolean }) {
+  const helpId = useId();
   const ref = useRef<HTMLCanvasElement>(null);
   const scatteredRef = useRef(false);
   const [scattered, setScattered] = useState(false);
@@ -107,7 +108,7 @@ export default function LeafMark() {
       const { data } = sampleContext.getImageData(0, 0, sample.width, sample.height);
       const targets: Target[] = [];
       let minX = sample.width, minY = sample.height, maxX = 0, maxY = 0;
-      const step = innerWidth < 700 ? 3 : 2;
+      const step = compact ? 4 : innerWidth < 700 ? 3 : 2;
       for (let y = 0; y < sample.height; y += step) for (let x = 0; x < sample.width; x += step) {
         const offset = (y * sample.width + x) * 4;
         if (data[offset + 3] < 150 || data[offset + 1] < 25) continue;
@@ -129,12 +130,15 @@ export default function LeafMark() {
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; start(); });
     const move = (event: PointerEvent) => { if (preference.matches) return; const bounds = canvas.getBoundingClientRect(); pointer = { x: event.clientX - bounds.left, y: event.clientY - bounds.top }; };
     const leave = () => { pointer = null; };
-    const tap = (event: PointerEvent) => { if (!preference.matches && event.isPrimary) setScattered(current => !current); };
+    let press: { x: number; y: number } | null = null;
+    const down = (event: PointerEvent) => { if (!preference.matches && event.isPrimary && event.button === 0) press = { x: event.clientX, y: event.clientY }; };
+    const tap = (event: PointerEvent) => { if (press && Math.hypot(event.clientX - press.x, event.clientY - press.y) < 9) setScattered(current => !current); press = null; if (event.pointerType === 'touch') pointer = null; };
+    const cancel = () => { press = null; pointer = null; };
     resize.observe(canvas); observer.observe(canvas);
-    canvas.addEventListener('pointermove', move, { passive: true }); canvas.addEventListener('pointerleave', leave); canvas.addEventListener('pointerdown', tap, { passive: true });
+    canvas.addEventListener('pointermove', move, { passive: true }); canvas.addEventListener('pointerleave', leave); canvas.addEventListener('pointerdown', down, { passive: true }); canvas.addEventListener('pointerup', tap, { passive: true }); canvas.addEventListener('pointercancel', cancel);
     document.addEventListener('visibilitychange', start); preference.addEventListener('change', start);
-    return () => { disposed = true; cancelAnimationFrame(frame); logo.onload = null; resize.disconnect(); observer.disconnect(); canvas.removeEventListener('pointermove', move); canvas.removeEventListener('pointerleave', leave); canvas.removeEventListener('pointerdown', tap); document.removeEventListener('visibilitychange', start); preference.removeEventListener('change', start); };
-  }, []);
+    return () => { disposed = true; cancelAnimationFrame(frame); logo.onload = null; resize.disconnect(); observer.disconnect(); canvas.removeEventListener('pointermove', move); canvas.removeEventListener('pointerleave', leave); canvas.removeEventListener('pointerdown', down); canvas.removeEventListener('pointerup', tap); canvas.removeEventListener('pointercancel', cancel); document.removeEventListener('visibilitychange', start); preference.removeEventListener('change', start); };
+  }, [compact]);
 
-  return <div className="leaf-scene"><canvas ref={ref} className="leaf-canvas" role={reduced ? 'img' : 'button'} tabIndex={reduced ? undefined : 0} aria-pressed={reduced ? undefined : scattered} aria-label={reduced ? 'BuildFeast leaf symbol rendered in particles' : 'Scatter and reform the BuildFeast leaf symbol'} aria-describedby="leaf-interaction-help" onKeyDown={event => { if (!reduced && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); setScattered(current => !current); } }}/><span id="leaf-interaction-help" className="sr-only">Move your pointer to interact. Tap, click, or press Enter to scatter the leaves. The symbol reforms automatically.</span></div>;
+  return <div className="leaf-scene"><canvas ref={ref} className="leaf-canvas" role={reduced ? 'img' : 'button'} tabIndex={reduced ? undefined : 0} aria-pressed={reduced ? undefined : scattered} aria-label={reduced ? 'BuildFeast leaf symbol rendered in particles' : 'Scatter and reform the BuildFeast leaf symbol'} aria-describedby={helpId} onPointerDown={compact ? event => event.stopPropagation() : undefined} onKeyDown={event => { if (!reduced && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); setScattered(current => !current); } }}/><span id={helpId} className="sr-only">Move your pointer to interact. Tap, click, or press Enter to scatter the leaves. The symbol reforms automatically.</span></div>;
 }

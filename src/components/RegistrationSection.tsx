@@ -19,7 +19,7 @@ export default function RegistrationSection({ config, onPolicy, initialInterest 
   const open = config.registrationStatus === 'open';
   const reduced = useReducedMotion();
   return <section id="registration" className="section registration-section" aria-labelledby="registration-heading">
-    <div className="section-top"><span className="eyebrow">07 / PARTICIPATION</span><span className="registration-status"><span className="status-dot"/>{open ? 'Registration open' : config.registrationStatus === 'closed' ? 'Registration closed · stay connected' : 'Registration coming soon'}</span></div>
+    <div className="registration-availability"><span className="registration-status"><span className="status-dot"/>{open ? 'Registration open' : config.registrationStatus === 'closed' ? 'Registration closed · stay connected' : 'Registration coming soon'}</span></div>
     <div className="registration-layout">
       <div className="registration-story"><h2 id="registration-heading" tabIndex={-1}>Take your place<br/><span>at BuildFeast.</span></h2><p>Explore participation details for BuildFeast 2027. Registration dates and final rules will be announced soon.</p><p className="registration-venue"><MapPin size={15}/>{config.venue || 'Offline event · venues announced soon'}</p>
         <ol className="join-journey">{[

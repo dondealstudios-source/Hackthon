@@ -28,7 +28,7 @@ export default function ProblemStatements({ config, onChoose }: { config: EventC
     }, 110);
   };
   return <section id="problem-statements" className="section statements-section" aria-labelledby="statements-heading">
-    <div className="section-top"><span className="eyebrow">02 / PROBLEM STATEMENTS</span><span className="tiny-note">{String(statements.length).padStart(2, '0')} PROBLEM STATEMENTS</span></div>
+    
     <div className="section-heading split-heading"><h2 id="statements-heading">Choose your<br/><span className="muted-heading">problem statement.</span></h2><p>Explore the hackathon’s problem statements and choose the one you would like to build for.</p></div>
     <ChallengeDeck statements={statements} active={active} onSelect={index => { stopShuffle(); setActive(index); }}/>
     <div className="challenge-discovery"><button type="button" className={`surprise-control ${shuffling ? 'is-shuffling' : ''}`} onClick={surprise} disabled={shuffling || statements.length < 2}><Shuffle size={14}/>{shuffling ? 'Finding a challenge…' : 'Surprise me'}</button></div>

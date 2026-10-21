@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <title>BuildFeast leaf emblem</title>
+  <defs>
+    <g id="person">
+      <circle cx="100" cy="24" r="18"/>
+      <path d="M94 88C74 69 44 62 62 21C77 43 101 43 94 88ZM106 88C126 69 156 62 138 21C123 43 99 43 106 88Z"/>
+    </g>
+  </defs>
+  <use href="#person" fill="#659b5e"/>
+  <use href="#person" fill="#063d2e" transform="rotate(90 100 100)"/>
+  <use href="#person" fill="#659b5e" transform="rotate(180 100 100)"/>
+  <use href="#person" fill="#063d2e" transform="rotate(270 100 100)"/>
+</svg>
