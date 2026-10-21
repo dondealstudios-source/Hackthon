@@ -3,7 +3,7 @@ type Pending = string | null;
 export interface EventConfig {
   name: string; tagline: string; registrationStatus: 'coming_soon' | 'open' | 'closed'; format: string; venue: Pending; period: string; dateLabel: string; dateAnnouncement: string;
   fee: number; feeBasis: 'per_participant' | 'per_team' | null;
-  organizer: { name: string; logo: Pending };
+  organizer: { name: string; logo: Pending; url?: string; brandLogo?: string };
   partners: { name: string; logo: Pending; url: Pending }[];
   prizes: { available: boolean; amount: Pending; categories: string[]; winnerCount: number | null; eligibility: Pending };
   internships: { selectedParticipants: number; statedValue: number; allocation: Pending; roles: Pending; duration: Pending; provider: Pending; eligibility: Pending; selectionCriteria: Pending };

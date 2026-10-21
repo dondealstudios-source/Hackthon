@@ -11,7 +11,7 @@ export function renderSeoDocument(html, config, pathname = '/') {
   const graph = {
     '@context': 'https://schema.org',
     '@graph': [
-      { '@type': 'Organization', '@id': SITE_URL + '/#organizer', name: 'VistaCortex', url: 'https://www.vistacortex.in' },
+      { '@type': 'Organization', '@id': SITE_URL + '/#organizer', name: 'VistaCortex', url: config.organizer.url || 'https://www.vistacortex.com/', logo: SITE_URL + (config.organizer.brandLogo || '/assets/vistacortex-organizer-transparent.png') },
       { '@type': 'WebSite', '@id': SITE_URL + '/#website', url: SITE_URL + '/', name: config.name, inLanguage: 'en-IN', publisher: { '@id': SITE_URL + '/#organizer' } },
       { '@type': 'WebPage', '@id': canonical + '#webpage', url: canonical, name: title, description: summary, inLanguage: 'en-IN', isPartOf: { '@id': SITE_URL + '/#website' } },
     ],

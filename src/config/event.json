@@ -11,7 +11,9 @@
   "feeBasis": null,
   "organizer": {
     "name": "VistaCortex",
-    "logo": "/assets/vistacortex-buildfeast-transparent.png"
+    "logo": "/assets/vistacortex-buildfeast-transparent.png",
+    "url": "https://www.vistacortex.com/",
+    "brandLogo": "/assets/vistacortex-organizer-transparent.png"
   },
   "partners": [
     {
