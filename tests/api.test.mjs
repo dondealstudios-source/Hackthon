@@ -22,7 +22,7 @@ before(async () => {
 after(async () => { child?.kill(); await setTimeout(400); rmSync(temp, { recursive: true, force: true }); });
 test('public configuration preserves official facts and closed payments', async () => {
   const c = await (await fetch(base + '/api/config')).json();
-  assert.equal(c.fee, 300); assert.equal(c.registrationStatus, 'coming_soon'); assert.equal(c.feeBasis, null);
+  assert.equal(c.fee, null); assert.equal(c.registrationStatus, 'coming_soon'); assert.equal(c.feeBasis, null);
   assert.equal(c.internships.selectedParticipants, 3); assert.equal(c.internships.statedValue, 20000);
   assert.deepEqual(c.partners.map(p => p.name), ['DONDEAL', 'COMPANY EXPRESS', 'DHARMA SETU']);
   assert.equal(JSON.stringify(c).includes(password), false);

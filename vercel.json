@@ -3,6 +3,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
+    { "source": "/register", "destination": "/index.html" },
+    { "source": "/register/", "destination": "/index.html" },
     { "source": "/faq", "destination": "/index.html" },
     { "source": "/faq/", "destination": "/index.html" },
     { "source": "/organizer", "destination": "/index.html" }

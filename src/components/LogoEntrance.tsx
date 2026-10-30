@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, RotateCcw } from 'lucide-react';
-import ChallengeArt from './ChallengeArt';
+const ChallengeArt = lazy(() => import('./ChallengeArt'));
 import './logo-entrance.css';
 
-const logo = '/assets/vistacortex-buildfeast-transparent.png';
+const logo = '/assets/brand-wordmark.webp';
 const DURATION = 5200;
 
 /** The eight challenge domains, drawn with the same animated art used in the challenge deck. */
@@ -44,13 +44,13 @@ export default function LogoEntrance() {
         <div className="intro-orbit">{Array.from({ length: domains }, (_, i) => {
           const angle = (i / domains) * 360 - 90;
           return <div key={i} className="intro-node" style={{ transform: `rotate(${angle}deg) translate(var(--r)) rotate(${-angle}deg)` }}>
-            <span><motion.i initial={{ opacity: 0, scale: 0, rotate: -120 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 130, damping: 12, delay: .7 + i * .17 }}><ChallengeArt index={i}/></motion.i></span>
+            <span><motion.i initial={{ opacity: 0, scale: 0, rotate: -120 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 130, damping: 12, delay: .7 + i * .17 }}><Suspense fallback={null}><ChallengeArt index={i}/></Suspense></motion.i></span>
           </div>;
         })}</div>
 
         <div className="intro-content">
           <motion.span className="intro-eyebrow" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.1, delay: .5 }}>Vistacortex&nbsp;&nbsp;&nbsp;&nbsp;presents</motion.span>
-          <div className="intro-logo"><img src={logo} width="2081" height="756" alt=""/><span className="intro-shine" style={{ maskImage: `url(${logo})`, WebkitMaskImage: `url(${logo})` }}><i/></span></div>
+          <div className="intro-logo"><img src={logo} width="560" height="203" alt=""/><span className="intro-shine" style={{ maskImage: `url(${logo})`, WebkitMaskImage: `url(${logo})` }}><i/></span></div>
           <div className="intro-tagline">{['Learn', 'Build', 'Launch'].map((word, i) => <motion.span key={word} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .6, delay: 2.2 + i * .28 }}>{word}</motion.span>)}</div>
         </div>
       </div>

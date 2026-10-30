@@ -2,7 +2,7 @@ import defaults from './event.json';
 type Pending = string | null;
 export interface EventConfig {
   name: string; tagline: string; registrationStatus: 'coming_soon' | 'open' | 'closed'; format: string; venue: Pending; period: string; dateLabel: string; dateAnnouncement: string;
-  fee: number; feeBasis: 'per_participant' | 'per_team' | null;
+  fee: number | null; feeBasis: 'per_participant' | 'per_team' | null;
   organizer: { name: string; logo: Pending; url?: string; brandLogo?: string };
   partners: { name: string; logo: Pending; url: Pending }[];
   prizes: { available: boolean; amount: Pending; categories: string[]; winnerCount: number | null; eligibility: Pending };

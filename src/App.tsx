@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from 'framer-motion';
 import { ArrowDown, ArrowRight, ArrowUpRight, ChevronDown, Menu, Trophy, X } from 'lucide-react';
 import { defaultEvent, type EventConfig } from './config/event';
@@ -14,22 +14,25 @@ import GuestCredit from './components/GuestCredit';
 import { MotionRibbon, LeafAtmosphere } from './components/MotionDetails';
 import Modal from './components/Modal';
 import EntryForm from './components/Forms';
-import Dashboard from './Dashboard';
-import FaqPage from './components/FaqPage';
-import IdeaPlayground from './components/IdeaPlayground';
 import ProblemStatements from './components/ProblemStatements';
 import SiteInteractions from './components/SiteInteractions';
 import JourneySteps from './components/JourneySteps';
 import LogoEntrance from './components/LogoEntrance';
-import { IdeaConstellation } from './components/InteractiveObjects';
+import { optimizedAsset } from './lib/assets';
 import RegistrationSection, { EventSnapshot, RegistrationDock } from './components/RegistrationSection';
 
-function Reveal({ children, className = '' }: { children: ReactNode; className?: string }) {
+const Dashboard = lazy(() => import('./Dashboard'));
+const RegistrationPage = lazy(() => import('./components/RegistrationPage'));
+const FaqPage = lazy(() => import('./components/FaqPage'));
+const IdeaPlayground = lazy(() => import('./components/IdeaPlayground'));
+const IdeaConstellation = lazy(() => import('./components/InteractiveObjects').then(module => ({ default: module.IdeaConstellation })));
+
+function Reveal({ children, className = '', eager = false }: { children: ReactNode; className?: string; eager?: boolean }) {
   const reduced = useReducedMotion();
-  return <motion.div className={className} initial={reduced ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .12 }} transition={{ duration: .45, ease: [.22, 1, .36, 1] }}>{children}</motion.div>;
+  return <motion.div className={className} initial={reduced || eager ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .12 }} transition={{ duration: .45, ease: [.22, 1, .36, 1] }}>{children}</motion.div>;
 }
-function Brand({ config }: { config: EventConfig }) {
-  return config.organizer.logo ? <img className="brand-logo" src={['/assets/vistacortex-logo-dark.png', '/assets/vistacortex-logo.png', '/assets/vistacortex-buildfeast-2027.png'].includes(config.organizer.logo) ? '/assets/vistacortex-buildfeast-transparent.png' : config.organizer.logo} alt={config.name}/> : <span className="brand-wordmark">vista<span>cortex</span></span>;
+function Brand({ config, priority = false }: { config: EventConfig; priority?: boolean }) {
+  return config.organizer.logo ? <img className="brand-logo" width={560} height={203} decoding="async" loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} src={optimizedAsset(['/assets/vistacortex-logo-dark.png', '/assets/vistacortex-logo.png', '/assets/vistacortex-buildfeast-2027.png'].includes(config.organizer.logo) ? '/assets/vistacortex-buildfeast-transparent.png' : config.organizer.logo)} alt={config.name}/> : <span className="brand-wordmark">vista<span>cortex</span></span>;
 }
 export default function App() {
   const [config, setConfig] = useState<EventConfig>(defaultEvent), [menu, setMenu] = useState(false);
@@ -39,6 +42,7 @@ export default function App() {
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 28 });
   const [activeDay, setActiveDay] = useState(0);
+  const [studioOpen, setStudioOpen] = useState(false);
   const [pathname, setPathname] = useState(window.location.pathname);
   useEffect(() => {
     const update = () => { setPathname(window.location.pathname); setMenu(false); setModal(null); requestAnimationFrame(() => { const target = window.location.hash && document.getElementById(window.location.hash.slice(1)); if (target) target.scrollIntoView({ behavior: 'instant' }); else window.scrollTo(0, 0); }); };
@@ -47,16 +51,17 @@ export default function App() {
       const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href]') : null;
       if (!link || link.target || link.hasAttribute('download')) return;
       const url = new URL(link.href, location.href);
-      if (url.origin !== location.origin || !['/', '/faq', '/faq/'].includes(url.pathname) || url.pathname === location.pathname) return;
+      if (url.origin !== location.origin || !['/', '/faq', '/faq/', '/register', '/register/'].includes(url.pathname) || url.pathname === location.pathname) return;
       event.preventDefault(); history.pushState(null, '', url.pathname + url.search + url.hash); update();
     };
     document.addEventListener('click', navigate); window.addEventListener('popstate', update);
     return () => { document.removeEventListener('click', navigate); window.removeEventListener('popstate', update); };
   }, []);
   useEffect(() => { fetch('/api/config', { credentials: 'omit' }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(data => setConfig({ ...data, name: data.name === 'VistaCortex BuildFest 2027' ? defaultEvent.name : data.name })).catch(() => {}); }, []);
-  if (pathname === '/organizer') return <Dashboard />;
-  if (/^\/faq\/?$/.test(pathname)) return <FaqPage config={config}/>;
-  const join = () => { document.getElementById('registration')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' }); document.getElementById('registration-heading')?.focus({ preventScroll: true }); setMenu(false); };
+  if (pathname === '/organizer') return <Suspense fallback={<div className="route-loading" role="status">Loading organizer dashboard…</div>}><Dashboard /></Suspense>;
+  if (/^\/faq\/?$/.test(pathname)) return <Suspense fallback={<div className="route-loading" role="status">Loading questions…</div>}><FaqPage config={config}/></Suspense>;
+  if (/^\/register\/?$/.test(pathname)) return <Suspense fallback={<div className="route-loading" role="status">Opening registration…</div>}><RegistrationPage config={config} initialInterest={selectedProblem}/></Suspense>;
+  const join = () => { history.pushState(null, '', '/register'); window.dispatchEvent(new PopStateEvent('popstate')); };
   const cta = config.registrationStatus === 'open' ? 'Register now' : 'Registration details';
   const status = config.registrationStatus === 'open' ? 'Registrations open' : config.registrationStatus === 'closed' ? 'Registrations closed' : 'Registrations opening soon';
   const icons = ['01', '02'];
@@ -64,11 +69,11 @@ export default function App() {
     <a href="#main" className="skip-link">Skip to content</a>
     <motion.div className="reading-progress" style={{ scaleX: reduced ? scrollYProgress : progress }} aria-hidden="true"/>
     <div className="site-shell">
-      <header className="header"><a href="#" className="brand" aria-label="VistaCortex home"><Brand config={config}/></a><nav className={menu ? 'nav open' : 'nav'} aria-label="Main navigation"><a href="#problem-statements" onClick={() => setMenu(false)}>Problem statements</a><a href="#program" onClick={() => setMenu(false)}>Program</a><a href="#registration" onClick={() => setMenu(false)}>Join the event</a><a href="/faq" onClick={() => setMenu(false)}>FAQs</a></nav><button className="button nav-cta" onClick={join}>{cta}<ArrowUpRight size={14}/></button><button className="menu-toggle icon-button" aria-label={menu ? 'Close menu' : 'Open menu'} aria-expanded={menu} onClick={() => setMenu(!menu)}>{menu ? <X/> : <Menu/>}</button></header>
-      <motion.main id="main" initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: .5, ease: [.22, 1, .36, 1] }}>
+      <header className="header"><a href="#" className="brand" aria-label="VistaCortex home"><Brand config={config} priority/></a><nav className={menu ? 'nav open' : 'nav'} aria-label="Main navigation"><a href="#problem-statements" onClick={() => setMenu(false)}>Problem statements</a><a href="#program" onClick={() => setMenu(false)}>Program</a><a href="/register" onClick={() => setMenu(false)}>Join the event</a><a href="/faq" onClick={() => setMenu(false)}>FAQs</a></nav><button className="button nav-cta" onClick={join}>{cta}<ArrowUpRight size={14}/></button><button className="menu-toggle icon-button" aria-label={menu ? 'Close menu' : 'Open menu'} aria-expanded={menu} onClick={() => setMenu(!menu)}>{menu ? <X/> : <Menu/>}</button></header>
+      <motion.main id="main" initial={false} animate={{ opacity: 1 }} transition={{ duration: .5, ease: [.22, 1, .36, 1] }}>
         <section className="hero editorial-hero" aria-labelledby="event-title">
           <div className="hero-editorial-grid">
-            <Reveal className="hero-content">
+            <Reveal className="hero-content" eager>
               <p className="hero-edition">VISTACORTEX PRESENTS <span>THE 2027 EDITION</span></p>
               <h1 id="event-title">BuildFeast<span className="hero-year">2027<span className="edition-period">.</span></span></h1>
               <p className="hero-lead">An in-person hackathon for student builders.</p>
@@ -103,21 +108,21 @@ export default function App() {
 
         <div id="flowing-threads" className="thread-interlude"><ParticleWave/></div>
 
-        <section id="partners" className="section partners-section"><Reveal><h2>In good company.</h2><p>Organized by VistaCortex, with support from our official partners.</p></Reveal><OrganizerCard config={config}/><div className="partner-grid">{config.partners.map(p => <Reveal key={p.name} className="partner-card"><span className="small-label">OFFICIAL PARTNER</span>{p.logo && p.url ? <a className="partner-logo-link" href={p.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${p.name} website`}><img src={p.logo} alt={p.name}/><ArrowUpRight className="partner-visit-icon" size={20}/></a> : <>{p.logo ? <img src={p.logo} alt={p.name}/> : <strong>{p.name}</strong>}{p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${p.name}`}><ArrowUpRight size={20}/></a> : <span className="partner-corner"><ArrowUpRight size={16}/></span>}</>}</Reveal>)}</div><GuestCredit/></section>
+        <section id="partners" className="section partners-section"><Reveal><h2>In good company.</h2><p>Organized by VistaCortex, with support from our official partners.</p></Reveal><OrganizerCard config={config}/><div className="partner-grid">{config.partners.map(p => <Reveal key={p.name} className="partner-card"><span className="small-label">OFFICIAL PARTNER</span>{p.logo && p.url ? <a className="partner-logo-link" href={p.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${p.name} website`}><img src={optimizedAsset(p.logo)} alt={p.name} loading="lazy" decoding="async" width={240} height={120}/><ArrowUpRight className="partner-visit-icon" size={20}/></a> : <>{p.logo ? <img src={optimizedAsset(p.logo)} alt={p.name} loading="lazy" decoding="async" width={240} height={120}/> : <strong>{p.name}</strong>}{p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${p.name}`}><ArrowUpRight size={20}/></a> : <span className="partner-corner"><ArrowUpRight size={16}/></span>}</>}</Reveal>)}</div><GuestCredit/></section>
 
-        <section id="idea-studio" className="section studio-section"><details className="studio-disclosure"><summary><div><span className="eyebrow">THE IDEA STUDIO</span><h2>Looking for a starting point?</h2><p>Explore practice prompts and an interactive idea canvas.</p></div><span className="studio-open-label">Open the studio<ChevronDown size={19}/></span></summary><div className="studio-body"><IdeaConstellation/><IdeaPlayground/></div></details></section>
+        <section id="idea-studio" className="section studio-section"><details className="studio-disclosure" onToggle={event => setStudioOpen(event.currentTarget.open)}><summary><div><span className="eyebrow">THE IDEA STUDIO</span><h2>Looking for a starting point?</h2><p>Explore practice prompts and an interactive idea canvas.</p></div><span className="studio-open-label">Open the studio<ChevronDown size={19}/></span></summary>{studioOpen && <div className="studio-body"><Suspense fallback={<p role="status">Opening the idea studio…</p>}><IdeaConstellation/><IdeaPlayground/></Suspense></div>}</details></section>
 
         <RegistrationSection config={config} onPolicy={setModal} initialInterest={selectedProblem}/>
 
 
 
-        <section id="next-step" className="closing-section"><div className="closing-grid"/><Reveal><span className="eyebrow"><span className="status-dot"/> VISTACORTEX BUILDFEAST 2027</span><h2>Your idea.<br/>Your next step.</h2><p>Join the community of students ready to build.</p><button className="button primary" onClick={join}>{cta}<ArrowUpRight size={17}/></button><span className="closing-status">{status.toUpperCase()} · {config.format.toUpperCase()} · ₹{config.fee}</span></Reveal><LaunchScene/></section>
+        <section id="next-step" className="closing-section"><div className="closing-grid"/><Reveal><span className="eyebrow"><span className="status-dot"/> VISTACORTEX BUILDFEAST 2027</span><h2>Your idea.<br/>Your next step.</h2><p>Join the community of students ready to build.</p><button className="button primary" onClick={join}>{cta}<ArrowUpRight size={17}/></button><span className="closing-status">{status.toUpperCase()} · {config.format.toUpperCase()} · {config.fee === null ? 'FEE ANNOUNCED SOON' : `₹${config.fee}`}</span></Reveal><LaunchScene/></section>
       </motion.main>
       <footer><LogoEntrance/><div className="footer-top"><div><a href="#" className="brand"><Brand config={config}/></a><p>{config.name}<br/><span>{config.tagline}</span></p><a className="footer-organizer" href={config.organizer.url || defaultEvent.organizer.url} target="_blank" rel="noopener noreferrer">ORGANIZED BY VISTACORTEX<ArrowUpRight size={11}/></a></div><div className="footer-links"><a href="#problem-statements">Problem statements</a><a href="#about">The event</a><a href="#program">Program</a><a href="#opportunities">Opportunities</a><a href="/faq">FAQs</a></div><div className="footer-info"><span className="eyebrow">OFFICIAL PARTNERS</span>{config.partners.map(p => p.url ? <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer">{p.name}<ArrowUpRight size={11}/></a> : <span key={p.name}>{p.name}</span>)}<p><span className="status-dot"/>{status}</p>{config.contact.email ? <a href={`mailto:${config.contact.email}`}>{config.contact.email}</a> : <span className="small muted">Contact details announced soon</span>}{config.socials.map((s: { name: string; url: string }) => <a href={s.url} key={s.name} rel="noreferrer" target="_blank">{s.name}</a>)}</div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} VistaCortex. All rights reserved.</span><div><button onClick={() => setModal('privacy')}>Privacy Policy</button><button onClick={() => setModal('terms')}>Terms & Conditions</button><button onClick={() => setModal('refund')}>Refund policy</button></div><a href="#">Back to top<ArrowUpRight size={12}/></a></div></footer>
     </div>
     <SiteInteractions/>
     <RegistrationDock config={config}/>
-    {modal && <Modal onClose={() => setModal(null)} title={modal === 'waitlist' ? 'Your next chapter awaits.' : modal === 'question' ? 'Ask before you launch.' : modal === 'registration' ? 'Let’s make it official.' : modal === 'privacy' ? 'Privacy Policy' : modal === 'terms' ? 'Terms & Conditions' : 'Refund & cancellation policy'}>{['waitlist', 'question', 'registration'].includes(modal) ? <EntryForm kind={modal as 'waitlist' | 'question' | 'registration'} config={config}/> : <div className="policy-copy">{modal === 'privacy' ? <><p>When enabled, waitlist submissions collect your name, email, institution, location, optional phone number, interests, participation preference, and consent. </p><p>If submissions are enabled before Google Sheets is integrated, these records are stored in the event database and are available to authenticated organizers to manage event updates. Browsing uses no analytics, tracking cookies, local storage, or session storage. Form submissions are currently disabled until the registration storage is connected. Organizer sign-in uses a short-lived token held only in page memory; refreshing the page signs the organizer out.</p><p>Third-party payment checkout is disabled by default. If enabled later, its provider may apply separate privacy and storage practices.</p><p>Before public launch, VistaCortex must publish its confirmed privacy contact and retention/deletion policy. {config.privacyContact || 'Privacy contact details are pending.'}</p></> : modal === 'terms' ? <><p>This is an offline event planned for late February 2027. Venues will be announced soon. Exact dates, eligibility, team size, certificates, deadlines, and final rules will be announced soon. This is a two-day offline hackathon.</p><p>A waitlist submission records interest and does not guarantee admission, prizes, or an internship. Internship opportunities are competitive. Their ₹20,000 stated value allocation and full terms remain to be confirmed.</p><p>{config.rulesAcceptedText || 'Paid registrations remain inactive until finalized rules, fee basis, refund policy, and payment credentials are configured.'}</p></> : <p>{config.refundPolicy || 'The refund and cancellation policy is being finalized and will be published before paid registration opens. No payment is collected while registration is inactive.'}</p>}</div>}</Modal>}
+    {modal && <Modal onClose={() => setModal(null)} title={modal === 'waitlist' ? 'Your next chapter awaits.' : modal === 'question' ? 'Ask before you launch.' : modal === 'registration' ? 'Let’s make it official.' : modal === 'privacy' ? 'Privacy Policy' : modal === 'terms' ? 'Terms & Conditions' : 'Refund & cancellation policy'}>{['waitlist', 'question', 'registration'].includes(modal) ? <EntryForm kind={modal as 'waitlist' | 'question' | 'registration'} config={config}/> : <div className="policy-copy">{modal === 'privacy' ? <><p>When enabled, waitlist submissions collect your name, email, institution, location, optional phone number, interests, participation preference, and consent. </p><p>If submissions are enabled before Google Sheets is integrated, these records are stored in the event database and are available to authenticated organizers to manage event updates. The dedicated registration page sends entries to the event’s Google Sheet only after consent and submission, once that connection is enabled. Before then, entries stay in page memory and are cleared on refresh. Browsing uses no analytics, tracking cookies, local storage, or session storage. Organizer sign-in uses a short-lived token held only in page memory; refreshing the page signs the organizer out.</p><p>Third-party payment checkout is disabled by default. If enabled later, its provider may apply separate privacy and storage practices.</p><p>Before public launch, VistaCortex must publish its confirmed privacy contact and retention/deletion policy. {config.privacyContact || 'Privacy contact details are pending.'}</p></> : modal === 'terms' ? <><p>This is an offline event planned for late February 2027. Venues will be announced soon. Exact dates, eligibility, team size, certificates, deadlines, and final rules will be announced soon. This is a two-day offline hackathon.</p><p>A waitlist submission records interest and does not guarantee admission, prizes, or an internship. Internship opportunities are competitive. Their ₹20,000 stated value allocation and full terms remain to be confirmed.</p><p>{config.rulesAcceptedText || 'Paid registrations remain inactive until finalized rules, fee basis, refund policy, and payment credentials are configured.'}</p></> : <p>{config.refundPolicy || 'The refund and cancellation policy is being finalized and will be published before paid registration opens. No payment is collected while registration is inactive.'}</p>}</div>}</Modal>}
   </>;
 }
 

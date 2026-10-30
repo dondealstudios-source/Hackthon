@@ -7,7 +7,7 @@
   "period": "Late February 2027",
   "dateLabel": "LATE FEBRUARY 2027 · EXACT DATES ANNOUNCED SOON",
   "dateAnnouncement": "Exact dates are planned to be announced in the first week of November 2026.",
-  "fee": 300,
+  "fee": null,
   "feeBasis": null,
   "organizer": {
     "name": "VistaCortex",
@@ -49,10 +49,10 @@
     "eligibility": null,
     "selectionCriteria": null
   },
-  "teamSize": null,
+  "teamSize": "Up to 4 members, including the team lead",
   "teamRules": {
     "minimum": null,
-    "maximum": null,
+    "maximum": 4,
     "individualAllowed": null
   },
   "eligibility": null,

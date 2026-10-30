@@ -57,11 +57,25 @@ export function challengeTargets(index: number) {
   }
   const data = ctx.getImageData(0, 0, 200, 200).data;
   const targets: { x: number; y: number; color: string }[] = [];
+  const palette = [[6,61,46,'#063d2e'],[101,155,94,'#659b5e'],[145,184,108,'#91b86c'],[163,198,128,'#a3c680']] as const;
+  const colors = new Map<string, string>();
+  const sampledColor = (r: number, g: number, b: number) => {
+    const key = r + ',' + g + ',' + b;
+    if (!colors.has(key)) {
+      let nearest: string = palette[0][3], distance = Infinity;
+      for (const [pr, pg, pb, color] of palette) {
+        const difference = (r-pr)**2 + (g-pg)**2 + (b-pb)**2;
+        if (difference < distance) { nearest = color; distance = difference; }
+      }
+      colors.set(key, nearest);
+    }
+    return colors.get(key)!;
+  };
   const spacing = matchMedia('(max-width:700px)').matches ? 3 : 2;
   for (let y = 0; y < 200; y += spacing) for (let x = 0; x < 200; x += spacing) {
     const offset = (y * 200 + x) * 4;
     if (data[offset + 3] < 150) continue;
-    targets.push({ x: (x - 100) / 180, y: (y - 100) / 180, color: `rgb(${data[offset]},${data[offset + 1]},${data[offset + 2]})` });
+    targets.push({ x: (x - 100) / 180, y: (y - 100) / 180, color: sampledColor(data[offset], data[offset + 1], data[offset + 2]) });
   }
   return targets;
 }

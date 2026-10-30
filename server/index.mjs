@@ -1,4 +1,5 @@
 import express from 'express';
+import sheetsRegistration from './sheets-registration.mjs';
 import { renderSeoDocument } from './seo.mjs';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
@@ -26,8 +27,8 @@ CREATE TABLE IF NOT EXISTS registrations (id TEXT PRIMARY KEY, email TEXT NOT NU
 CREATE TABLE IF NOT EXISTS sessions (token_hash TEXT PRIMARY KEY, expires_at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);`);
 
-function config() { const saved = db.prepare('SELECT value FROM settings WHERE key=?').get('event'); const result = saved ? { ...structuredClone(defaults), ...JSON.parse(saved.value) } : structuredClone(defaults); result.organizer = { ...defaults.organizer, ...result.organizer }; if (result.organizer.brandLogo === '/assets/vistacortex-organizer.png') result.organizer.brandLogo = defaults.organizer.brandLogo; if (['Online event', 'Offline event'].includes(result.format)) result.format = defaults.format; if (result.schedule.length !== 2 || result.schedule.some(day => /workshop|mentoring|online hackathon/i.test(day.title))) result.schedule = structuredClone(defaults.schedule); result.hackathon.problemStatements ||= defaults.hackathon.problemStatements; result.partners = result.partners.map(partner => { const official = defaults.partners.find(item => item.name === partner.name); return ['DONDEAL', 'COMPANY EXPRESS', 'DHARMA SETU'].includes(partner.name) ? { ...partner, logo: partner.logo || official.logo, url: partner.url || official.url } : partner; }); return result; }
-function paymentReady(c = config()) { return Boolean(submissionsEnabled && checkoutEnabled && c.registrationStatus === 'open' && ['per_participant', 'per_team'].includes(c.feeBasis) && c.rulesAcceptedText && c.eligibility && c.teamSize && Number.isInteger(c.teamRules.minimum) && Number.isInteger(c.teamRules.maximum) && typeof c.teamRules.individualAllowed === 'boolean' && c.registrationDeadline && !Number.isNaN(Date.parse(c.registrationDeadline)) && c.refundPolicy && c.contact.email && c.privacyContact && process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && process.env.RAZORPAY_WEBHOOK_SECRET); }
+function config() { const saved = db.prepare('SELECT value FROM settings WHERE key=?').get('event'); const result = saved ? { ...structuredClone(defaults), ...JSON.parse(saved.value) } : structuredClone(defaults); if (defaults.fee === null && result.fee === 300 && result.feeBasis === null) result.fee = null; result.teamRules = { ...defaults.teamRules, ...result.teamRules, maximum: Math.min(result.teamRules?.maximum ?? 4, 4) }; result.teamSize ||= defaults.teamSize; result.hackathon.teamSize ||= defaults.hackathon.teamSize; result.organizer = { ...defaults.organizer, ...result.organizer }; if (result.organizer.brandLogo === '/assets/vistacortex-organizer.png') result.organizer.brandLogo = defaults.organizer.brandLogo; if (['Online event', 'Offline event'].includes(result.format)) result.format = defaults.format; if (result.schedule.length !== 2 || result.schedule.some(day => /workshop|mentoring|online hackathon/i.test(day.title))) result.schedule = structuredClone(defaults.schedule); result.hackathon.problemStatements ||= defaults.hackathon.problemStatements; result.partners = result.partners.map(partner => { const official = defaults.partners.find(item => item.name === partner.name); return ['DONDEAL', 'COMPANY EXPRESS', 'DHARMA SETU'].includes(partner.name) ? { ...partner, logo: partner.logo || official.logo, url: partner.url || official.url } : partner; }); return result; }
+function paymentReady(c = config()) { return Boolean(submissionsEnabled && checkoutEnabled && c.registrationStatus === 'open' && Number.isSafeInteger(c.fee) && c.fee > 0 && c.fee <= 100000 && ['per_participant', 'per_team'].includes(c.feeBasis) && c.rulesAcceptedText && c.eligibility && c.teamSize && Number.isInteger(c.teamRules.minimum) && Number.isInteger(c.teamRules.maximum) && typeof c.teamRules.individualAllowed === 'boolean' && c.registrationDeadline && !Number.isNaN(Date.parse(c.registrationDeadline)) && c.refundPolicy && c.contact.email && c.privacyContact && process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && process.env.RAZORPAY_WEBHOOK_SECRET); }
 const app = express();
 app.disable('x-powered-by');
 app.use(helmet({ referrerPolicy: { policy: 'no-referrer' }, contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: checkoutEnabled ? ["'self'", 'https://checkout.razorpay.com'] : ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:'], connectSrc: checkoutEnabled ? ["'self'", 'https://api.razorpay.com'] : ["'self'"], frameSrc: checkoutEnabled ? ['https://api.razorpay.com', 'https://checkout.razorpay.com'] : ["'none'"], frameAncestors: ["'none'"], baseUri: ["'self'"], formAction: ["'self'"], fontSrc: ["'self'"], objectSrc: ["'none'"], upgradeInsecureRequests: production ? [] : null } } }));
@@ -38,6 +39,7 @@ app.use('/api', (req, res, next) => { res.set('Cache-Control', 'no-store'); next
 function sameOrigin(req, res, next) {
   if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
     const allowed = production ? [process.env.PUBLIC_ORIGIN] : ['http://localhost:5173', 'http://127.0.0.1:5173', `http://localhost:${process.env.PORT || 3001}`, `http://127.0.0.1:${process.env.PORT || 3001}`, process.env.PUBLIC_ORIGIN];
+    if (!production && /^http:\/\/(localhost|127\.0\.0\.1):[0-9]{1,5}$/.test(req.headers.origin || '')) allowed.push(req.headers.origin);
     if (req.headers['sec-fetch-site'] === 'cross-site' || (req.headers.origin && !allowed.includes(req.headers.origin))) return res.status(403).json({ error: 'This request must come from the event website.' });
   }
   next();
@@ -72,6 +74,8 @@ app.post('/api/payments/webhook', limiter(300, 60000), express.raw({ type: 'appl
   return res.json({ received: true });
 });
 app.use('/api', sameOrigin, express.json({ limit: '64kb' }));
+app.get('/api/registration/submit', (req, res) => sheetsRegistration(req, res, config()));
+app.post('/api/registration/submit', limiter(20), (req, res) => sheetsRegistration(req, res, config()));
 app.get('/api/privacy-status', (_req, res) => res.json({ formSubmissionsEnabled: submissionsEnabled, paymentCheckoutEnabled: submissionsEnabled && checkoutEnabled }));
 app.use(['/api/waitlist', '/api/questions', '/api/registration/order', '/api/registration/verify', '/api/payments/webhook'], (req, res, next) => { if (req.method === 'POST' && !submissionsEnabled) return res.status(503).json({ error: 'Submissions are not open yet. Participant details are not being collected.' }); next(); });
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
@@ -190,6 +194,7 @@ app.get('/api/admin/export', (req, res) => {
 function validateConfig(c) {
   if (!c || typeof c !== 'object' || Array.isArray(c)) throw new Error('Configuration must be an object.');
   function shape(value, base, key = '') {
+    if (key === 'fee') { if (value !== null && (!Number.isSafeInteger(value) || value <= 0 || value > 100000)) throw new Error('Fee must be a positive whole number of rupees or null.'); return; }
     if (base === null) { if (['winnerCount', 'minimum', 'maximum'].includes(key)) { if (value !== null && (!Number.isSafeInteger(value) || value < 1 || value > 10000)) throw new Error(`${key} must be a positive integer or null.`); return; } if (key === 'individualAllowed') { if (value !== null && typeof value !== 'boolean') throw new Error('individualAllowed must be true, false, or null.'); return; } if (value !== null && (typeof value !== 'string' || value.length > 10000)) throw new Error(`${key} must be text or null.`); return; }
     if (Array.isArray(base)) {
       if (!Array.isArray(value) || value.length > 100) throw new Error(`${key} must be an array with at most 100 items.`);
@@ -206,7 +211,7 @@ function validateConfig(c) {
   shape(c, defaults);
   if (!['coming_soon', 'open', 'closed'].includes(c.registrationStatus)) throw new Error('Invalid registration status.');
   if (c.feeBasis !== null && !['per_participant', 'per_team'].includes(c.feeBasis)) throw new Error('feeBasis must be per_participant, per_team, or null.');
-  if (!Number.isSafeInteger(c.fee) || c.fee <= 0 || c.fee > 100000) throw new Error('Fee must be a positive whole number of rupees.');
+  if (c.fee !== null && (!Number.isSafeInteger(c.fee) || c.fee <= 0 || c.fee > 100000)) throw new Error('Fee must be a positive whole number of rupees or null.');
   if (!Number.isSafeInteger(c.internships.selectedParticipants) || c.internships.selectedParticipants < 1 || !Number.isSafeInteger(c.internships.statedValue) || c.internships.statedValue < 0) throw new Error('Invalid internship numbers.');
   if (c.teamRules.minimum !== null && c.teamRules.maximum !== null && (c.teamRules.minimum > c.teamRules.maximum || c.teamRules.maximum > 100)) throw new Error('Team bounds must be ordered and at most 100 members.');
   if (c.registrationDeadline && (!/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(c.registrationDeadline) || Number.isNaN(Date.parse(c.registrationDeadline)))) throw new Error('Use an ISO date and time with timezone for registrationDeadline.');
@@ -225,7 +230,7 @@ app.put('/api/admin/config', (req, res) => {
 app.use('/api', (_req, res) => res.status(404).json({ error: 'API endpoint not found.' }));
 if (existsSync(resolve(root, 'dist/index.html'))) {
   app.use(express.static(resolve(root, 'dist'), { index: false }));
-  app.get(['/', '/faq', '/faq/', '/organizer'], (req, res) => { if (req.path === '/organizer') res.set('X-Robots-Tag', 'noindex, nofollow'); res.type('html').send(renderSeoDocument(readFileSync(resolve(root, 'dist/index.html'), 'utf8'), config(), req.path)); });
+  app.get(['/', '/faq', '/faq/', '/register', '/register/', '/organizer'], (req, res) => { if (req.path === '/organizer') res.set('X-Robots-Tag', 'noindex, nofollow'); res.type('html').send(renderSeoDocument(readFileSync(resolve(root, 'dist/index.html'), 'utf8'), config(), req.path)); });
 }
 app.use((err, _req, res, _next) => { res.status(err.status || 500).json({ error: err.status === 400 ? 'Invalid request body.' : err.status === 413 ? 'Submission is too large.' : 'The server could not save this request. Please retry.' }); });
 const server = app.listen(Number(process.env.PORT || 3001), '127.0.0.1', () => console.log(`BuildFeast server ready on http://127.0.0.1:${process.env.PORT || 3001}`));
