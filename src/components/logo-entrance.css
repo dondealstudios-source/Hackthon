@@ -1,0 +1,31 @@
+.intro{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:#f8f9f3;overflow:hidden;pointer-events:none}
+.intro-stage{--r:calc(min(82vw,82vh,640px) / 2);position:relative;width:min(82vw,82vh,640px);aspect-ratio:1;display:grid;place-items:center}
+.intro-glow{position:absolute;inset:14%;border-radius:50%;background:radial-gradient(circle,#cfe2bf88,transparent 68%);animation:intro-breathe 3s ease-in-out infinite}
+.intro-ripple{position:absolute;inset:0;border-radius:50%;border:1px solid #a9c795}
+.intro-ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.intro-ring circle{fill:none;stroke:#c9d8bb;stroke-width:.25}
+.intro-ring-inner{animation:intro-spin 60s linear infinite reverse}
+.intro-ring-inner circle{stroke:#d9e5cd;stroke-width:.2;stroke-dasharray:.8 2.2}
+.intro-orbit{position:absolute;inset:0;will-change:transform;animation:intro-spin 40s linear infinite}
+.intro-node{position:absolute;left:50%;top:50%;width:0;height:0}
+.intro-node span{position:absolute;left:-44px;top:-44px;width:88px;height:88px;display:grid;place-items:center;background:#f8f9f3;border-radius:50%;will-change:transform;animation:intro-unspin 40s linear infinite}
+.intro-node i{display:block;width:100%;height:100%;padding:6px}
+.intro-dots{position:absolute;inset:0}
+.intro-dots span{position:absolute;border-radius:50%;background:#cfdcc0;opacity:0;will-change:transform;animation:intro-dot-in .7s ease-out forwards,intro-dot-drift 5s ease-in-out infinite}
+.intro-content{position:relative;width:74%;text-align:center}
+.intro-logo{position:relative}
+.intro-logo img{display:block;width:100%;height:auto}
+.intro-shine{position:absolute;inset:0;overflow:hidden;mask-size:100% 100%;-webkit-mask-size:100% 100%}.intro-shine i{position:absolute;top:0;bottom:0;left:0;width:60%;background:linear-gradient(105deg,transparent 35%,#ffffffcc 50%,transparent 65%);transform:translateX(-100%);will-change:transform;animation:intro-shine 1.4s ease-in-out 1.4s forwards}
+.intro-eyebrow{position:absolute;left:0;right:0;bottom:calc(100% + 18px);font:italic 13px Georgia,serif;letter-spacing:1.5px;color:#2d5a3d}
+.intro-tagline{position:absolute;left:0;right:0;top:calc(100% + 22px);display:flex;gap:10px;justify-content:center;font:600 clamp(13px,2vw,17px) Poppins,system-ui,sans-serif;letter-spacing:3px;color:#8fb09a}
+.intro-tagline span+span:before{content:'.';margin-right:10px}
+.intro-skip{position:absolute;bottom:26px;right:30px;display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:10px;color:#2d5a3d;font-size:11px;font-weight:700;letter-spacing:.5px;pointer-events:auto;cursor:pointer}
+.intro-skip svg{transition:transform .2s}.intro-skip:hover svg{transform:translateX(3px)}
+@keyframes intro-spin{to{transform:rotate(360deg)}}
+@keyframes intro-unspin{to{transform:rotate(-360deg)}}
+@keyframes intro-breathe{0%,100%{opacity:.7;transform:scale(.94)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes intro-shine{to{transform:translateX(220%)}}
+@keyframes intro-dot-in{from{opacity:0;scale:0}to{opacity:.8;scale:1}}
+@keyframes intro-dot-drift{50%{transform:translate(calc(var(--drift) / 2),calc(var(--drift) * -1))}}
+@media(max-width:700px){.intro-stage{--r:46vw;width:92vw}.intro-node span{left:-30px;top:-30px;width:60px;height:60px}.intro-content{width:66%}.intro-skip{bottom:18px;right:14px}}
+@media(prefers-reduced-motion:reduce){.intro{display:none}}
